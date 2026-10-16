@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131c">
+  <title>Extension Hub — Chrome Extensions</title>
+  <meta name="description" content="Discover Chrome extensions, explore their features, and find installation instructions.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c0f17;
+      --panel: #151a27;
+      --border: #293247;
+      --muted: #a0abc0;
+      --text: #f3f5fb;
+      --accent: #9b8cff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 50% -15%, #28244c 0, transparent 55%), var(--bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, -apple-system, sans-serif;
+    }
+    a { color: inherit; }
+    button, input { font: inherit; }
+    .wrap { width: min(1050px, calc(100% - 36px)); margin: auto; }
+    header { padding: 24px 0; border-bottom: 1px solid var(--border); }
+    .nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .brand { font-weight: 800; letter-spacing: -.5px; font-size: 20px; }
+    .brand span { color: var(--accent); }
+    .pill { color: #d0caff; border: 1px solid #50477d; padding: 5px 10px; border-radius: 99px; font-size: 12px; }
+    .hero { text-align: center; padding: 76px 0 44px; }
+    .eyebrow { color: #c3baff; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 2px; }
+    h1 { font-size: clamp(36px, 7vw, 64px); line-height: 1.08; letter-spacing: -2px; margin: 14px 0; }
+    .hero p { color: var(--muted); max-width: 580px; margin: 0 auto 26px; }
+    .search { display: block; width: min(560px, 100%); margin: 0 auto; padding: 15px 18px; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 14px; outline: none; }
+    .search:focus { border-color: var(--accent); }
+    .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 22px 0; }
+    h2 { font-size: 23px; margin: 0; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(265px, 1fr)); gap: 18px; padding-bottom: 50px; }
+    .card { display: flex; flex-direction: column; padding: 22px; border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(145deg, #191f30, #121621); min-width: 0; }
+    .card-top { display: flex; align-items: center; gap: 14px; }
+    .app-icon { width: 54px; height: 54px; border-radius: 14px; background: #292541; display: grid; place-items: center; font-size: 27px; flex-shrink: 0; }
+    h3 { margin: 0; font-size: 19px; }
+    .category { color: #c3baff; font-size: 12px; }
+    .description { color: var(--muted); font-size: 14px; flex: 1; min-height: 65px; margin: 18px 0; }
+    .actions { display: flex; flex-wrap: wrap; gap: 9px; }
+    .btn { display: inline-flex; justify-content: center; align-items: center; text-align: center; text-decoration: none; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .primary { color: #100d20; background: #b7aaff; border-color: #b7aaff; }
+    .btn:hover { filter: brightness(1.12); }
+    .empty { padding: 40px 0; text-align: center; color: var(--muted); }
+    .notice { border: 1px solid var(--border); background: #131824; border-radius: 14px; padding: 18px; margin: 0 0 45px; color: var(--muted); font-size: 13px; }
+    .notice strong { color: var(--text); }
+    footer { border-top: 1px solid var(--border); padding: 25px 0; color: var(--muted); font-size: 13px; }
+    footer a { color: #c3baff; }
+    @media (max-width: 480px) { .hero { padding-top: 52px; } .section-head { align-items: flex-start; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">Extension<span>Hub</span></div>
+      <div class="pill">CHROME EXTENSIONS</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Your browser, your way</div>
+      <h1>Find your next<br>favorite extension.</h1>
+      <p>Explore useful browser tools, discover what they do, and find the right installation option for your device.</p>
+      <input class="search" id="search" type="search" placeholder="Search extensions..." aria-label="Search extensions">
+    </section>
+
+    <section aria-labelledby="catalog-title">
+      <div class="section-head">
+        <h2 id="catalog-title">Explore extensions</h2>
+        <span class="muted" id="count"></span>
+      </div>
+      <div class="grid" id="catalog"></div>
+      <div class="empty" id="empty" hidden>No extensions found. Try a different search.</div>
+    </section>
+
+    <aside class="notice">
+      <strong>Installation and safety</strong><br>
+      For the most reliable installation, use an extension's official Chrome Web Store listing when available. CRX downloads may not install on every operating system or managed device. Only install extensions you trust, and review their requested permissions before enabling them.
+    </aside>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>ExtensionHub · An independent extension directory.</div>
+      <div>Not affiliated with Google or the Chrome Web Store.</div>
+    </div>
+  </footer>
+
+  <script>
+    /*
+      ADD YOUR EXTENSIONS HERE.
+
+      storeUrl: official Chrome Web Store listing URL, or "" if none.
+      crx: path to a CRX file in your GitHub repository, or "".
+      icon: emoji for now; you can replace this with your own icon.
+
+      Only list extensions you have permission to distribute.
+    */
+    const extensions = [
+      {
+        name: "Example Extension",
+        category: "Productivity",
+        icon: "🧩",
+        description: "Replace this with a clear description of what your extension does.",
+        storeUrl: "",
+        crx: "downloads/example-extension.crx"
+      },
+      {
+        name: "Another Extension",
+        category: "Utilities",
+        icon: "⚡",
+        description: "Add another extension here with its own description and download.",
+        storeUrl: "",
+        crx: ""
+      }
+    ];
+
+    const catalog = document.getElementById("catalog");
+    const search = document.getElementById("search");
+    const count = document.getElementById("count");
+    const empty = document.getElementById("empty");
+
+    function safeUrl(value) {
+      try {
+        const url = new URL(value, window.location.href);
+        if (url.protocol !== "https:" && url.origin !== window.location.origin) return "";
+        if (url.protocol !== "https:" && url.protocol !== "http:") return "";
+        return url.href;
+      } catch {
+        return "";
+      }
+    }
+
+    function render() {
+      const term = search.value.trim().toLowerCase();
+      const results = extensions.filter(item =>
+        [item.name, item.category, item.description]
+          .some(value => value.toLowerCase().includes(term))
+      );
+
+      count.textContent = `${results.length} extension${results.length === 1 ? "" : "s"}`;
+      empty.hidden = results.length > 0;
+      catalog.replaceChildren();
+
+      results.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const top = document.createElement("div");
+        top.className = "card-top";
+
+        const icon = document.createElement("div");
+        icon.className = "app-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = item.icon;
+
+        const heading = document.createElement("div");
+        const name = document.createElement("h3");
+        name.textContent = item.name;
+
+        const category = document.createElement("div");
+        category.className = "category";
+        category.textContent = item.category;
+
+        heading.append(name, category);
+        top.append(icon, heading);
+
+        const description = document.createElement("p");
+        description.className = "description";
+        description.textContent = item.description;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const store = safeUrl(item.storeUrl);
+        const crx = item.crx ? safeUrl(item.crx) : "";
+
+        if (store && new URL(store).hostname === "chromewebstore.google.com") {
+          const link = document.createElement("a");
+          link.className = "btn primary";
+          link.href = store;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "Install from Store";
+          actions.append(link);
+        }
+
+        if (crx && new URL(crx).origin === window.location.origin &&
+            crx.toLowerCase().endsWith(".crx")) {
+          const link = document.createElement("a");
+          link.className = "btn";
+          link.href = crx;
+          link.download = "";
+          link.textContent = "Download CRX";
+          actions.append(link);
+        }
+
+        if (!actions.children.length) {
+          const note = document.createElement("span");
+          note.className = "muted";
+          note.textContent = "Installation link coming soon";
+          actions.append(note);
+        }
+
+        card.append(top, description, actions);
+        catalog.append(card);
+      });
+    }
+
+    search.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>
